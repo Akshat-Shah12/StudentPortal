@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">StudentPortal</string>
+    <string name="base_url">http://akshatvshah108.pythonanywhere.com/</string>
+</resources>
