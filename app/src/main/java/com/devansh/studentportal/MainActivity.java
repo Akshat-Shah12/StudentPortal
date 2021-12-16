@@ -8,15 +8,19 @@ import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.devansh.studentportal.models.EntireStudentData;
 import com.devansh.studentportal.models.StudentData;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -28,11 +32,33 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class MainActivity extends AppCompatActivity {
 
     private ArrayList<StudentData> studentDataArrayList;
+    private String searchText = "";
+    private RecyclerView recyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        searchText = "";
+        recyclerView = findViewById(R.id.recycler);
+        recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+        ((EditText)findViewById(R.id.et_search)).addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                searchText = s.toString();
+                filterStudentList(searchText);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
         findViewById(R.id.add_student).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -69,11 +95,17 @@ public class MainActivity extends AppCompatActivity {
                     if(studentDataArrayList==null) return;
                     id = 1;
                 }
-                studentData.setId(id);
-                studentData.setName(name);
-                studentData.setBranch(branch);
-                studentData.setCgpa(Float.parseFloat(cgpa));
-                studentData.setSap(Long.parseLong(sap));
+                try {
+                    studentData.setId(id);
+                    studentData.setName(name);
+                    studentData.setBranch(branch);
+                    studentData.setCgpa(Float.parseFloat(cgpa));
+                    studentData.setSap(Long.parseLong(sap));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Toast.makeText(MainActivity.this,"Invalid Parameters",Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 Retrofit retrofit = new Retrofit.Builder()
                         .baseUrl(getString(R.string.base_url))
                         .addConverterFactory(GsonConverterFactory.create())
@@ -114,9 +146,9 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(Call<EntireStudentData> call, Response<EntireStudentData> response) {
                 if(response.isSuccessful() && response.body()!=null){
                     studentDataArrayList = response.body().getData();
-                    RecyclerView recyclerView = findViewById(R.id.recycler);
-                    recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
-                    recyclerView.setAdapter(new StudentAdapter(studentDataArrayList));
+                    if(recyclerView.getAdapter()==null) recyclerView.setAdapter(new StudentAdapter(studentDataArrayList));
+                    else((StudentAdapter)recyclerView.getAdapter()).setStudentDataArrayList(studentDataArrayList);
+                    filterStudentList(searchText);
                 }
             }
 
@@ -125,5 +157,38 @@ public class MainActivity extends AppCompatActivity {
                 int i=0;
             }
         });
+    }
+
+    private void filterStudentList(String searchText) {
+        ArrayList<StudentData> filteredList = new ArrayList<>();
+        for(StudentData data : studentDataArrayList){
+            if(data.getName().toLowerCase().contains(searchText.toLowerCase())
+                    || data.getBranch().toLowerCase().contains(searchText.toLowerCase())
+                    || String.valueOf(data.getSap()).contains(searchText.toLowerCase())
+                    || String.valueOf(data.getCgpa()).contains(searchText.toLowerCase())){
+                filteredList.add(data);
+            }
+        }
+        filteredList = sortList(filteredList);
+        ((StudentAdapter)recyclerView.getAdapter()).setStudentDataArrayList(filteredList);
+    }
+    private ArrayList<StudentData> sortList(ArrayList<StudentData> arrayList){
+        StudentData[] studentData = new StudentData[arrayList.size()];
+        int i,j;
+        for(i=0;i<arrayList.size();i++){
+            studentData[i] = arrayList.get(i);
+        }
+        for(i=0;i<arrayList.size()-1;i++){
+            for(j=0;j<arrayList.size()-1-i;j++){
+                if(studentData[j].getName().compareTo(studentData[j+1].getName())>0){
+                    StudentData temp = studentData[j];
+                    studentData[j] = studentData[j+1];
+                    studentData[j+1] = temp;
+                }
+            }
+        }
+        arrayList.clear();
+        arrayList.addAll(Arrays.asList(studentData));
+        return arrayList;
     }
 }

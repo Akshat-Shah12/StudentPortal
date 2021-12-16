@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.devansh.studentportal.models.StudentData;
 
@@ -68,11 +69,17 @@ public class ViewStudentActivity extends AppCompatActivity {
                 String branch = ((EditText)dialog.findViewById(R.id.branch)).getText().toString();
                 String sap = ((EditText)dialog.findViewById(R.id.sap)).getText().toString();
                 String cgpa = ((EditText)dialog.findViewById(R.id.cgpa)).getText().toString();
-                studentData.setId(Integer.parseInt(getIntent().getStringExtra("id")));
-                studentData.setName(name);
-                studentData.setBranch(branch);
-                studentData.setCgpa(Float.parseFloat(cgpa));
-                studentData.setSap(Long.parseLong(sap));
+                try {
+                    studentData.setId(Integer.parseInt(getIntent().getStringExtra("id")));
+                    studentData.setName(name);
+                    studentData.setBranch(branch);
+                    studentData.setCgpa(Float.parseFloat(cgpa));
+                    studentData.setSap(Long.parseLong(sap));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Toast.makeText(ViewStudentActivity.this, "Invalid Parameters", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 Retrofit retrofit = new Retrofit.Builder()
                         .baseUrl(getString(R.string.base_url))
                         .addConverterFactory(GsonConverterFactory.create())

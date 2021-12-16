@@ -39,6 +39,11 @@ public class StudentAdapter  extends RecyclerView.Adapter<StudentAdapter.ViewHol
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        holder.itemView.setVisibility(View.VISIBLE);
+        if(position==studentDataArrayList.size()){
+            holder.itemView.setVisibility(View.INVISIBLE);
+            return;
+        }
         StudentData studentData = studentDataArrayList.get(position);
         holder.name.setText(studentData.getName());
         holder.branch.setText(studentData.getBranch());
@@ -59,7 +64,7 @@ public class StudentAdapter  extends RecyclerView.Adapter<StudentAdapter.ViewHol
 
     @Override
     public int getItemCount() {
-        return studentDataArrayList.size();
+        return studentDataArrayList.size()+1;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
