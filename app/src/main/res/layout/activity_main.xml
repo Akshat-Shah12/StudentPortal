@@ -66,4 +66,22 @@
 
     </androidx.cardview.widget.CardView>
 
+    <androidx.cardview.widget.CardView
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        app:cardCornerRadius="35dp"
+        app:cardBackgroundColor="@color/purple_700"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="10dp"
+        android:id="@+id/filter_list"
+        android:layout_toStartOf="@id/add_student">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="8dp"
+            android:src="@drawable/ic_baseline_filter_alt_24"/>
+
+    </androidx.cardview.widget.CardView>
+
 </RelativeLayout>

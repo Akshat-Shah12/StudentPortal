@@ -24,6 +24,10 @@ public class StudentAdapter  extends RecyclerView.Adapter<StudentAdapter.ViewHol
         this.studentDataArrayList = studentDataArrayList;
     }
 
+    public ArrayList<StudentData> getStudentDataArrayList() {
+        return studentDataArrayList;
+    }
+
     @SuppressLint("NotifyDataSetChanged")
     public void setStudentDataArrayList(ArrayList<StudentData> studentDataArrayList) {
         this.studentDataArrayList = studentDataArrayList;

@@ -1,4 +1,5 @@
 <resources>
-    <string name="app_name">StudentPortal</string>
+    <string name="app_name">Student Portal</string>
     <string name="base_url">http://akshatvshah108.pythonanywhere.com/</string>
+    <string name="oauth_client_key">165140389657-lkpthqoas0hu9ecmoptu4i08uav2cbfh.apps.googleusercontent.com</string>
 </resources>

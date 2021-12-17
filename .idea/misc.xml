@@ -6,7 +6,9 @@
         <entry key="app/src/main/res/drawable/ic_baseline_branch_24.xml" value="0.33645833333333336" />
         <entry key="app/src/main/res/drawable/ic_baseline_star_24.xml" value="0.33645833333333336" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.30520833333333336" />
+        <entry key="app/src/main/res/layout/activity_sign_in.xml" value="0.17395833333333333" />
         <entry key="app/src/main/res/layout/activity_view_student.xml" value="0.3203125" />
+        <entry key="app/src/main/res/layout/dialog_select_branch.xml" value="0.3203125" />
         <entry key="app/src/main/res/layout/dialog_update_student.xml" value="0.3203125" />
         <entry key="app/src/main/res/layout/recycler_item.xml" value="0.17395833333333333" />
       </map>
