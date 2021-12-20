@@ -24,13 +24,31 @@
         android:id="@+id/name"
         android:hint="Name"/>
 
-    <EditText
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:inputType="textCapWords"
-        android:id="@+id/branch"
-        android:hint="Branch"/>
+        android:layout_marginTop="10dp">
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textCapWords"
+            android:id="@+id/branch"
+            android:layout_toStartOf="@id/choose"
+            android:hint="Branch"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:textColor="#0000FF"
+            android:textSize="18sp"
+            android:text="CHOOSE"
+            android:visibility="gone"
+            android:layout_centerVertical="true"
+            android:id="@+id/choose"/>
+
+    </RelativeLayout>
 
     <EditText
         android:layout_width="match_parent"

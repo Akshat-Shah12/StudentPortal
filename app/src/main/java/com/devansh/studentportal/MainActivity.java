@@ -11,8 +11,10 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -22,6 +24,10 @@ import android.widget.Toast;
 
 import com.devansh.studentportal.models.EntireStudentData;
 import com.devansh.studentportal.models.StudentData;
+import com.google.android.flexbox.AlignItems;
+import com.google.android.flexbox.FlexDirection;
+import com.google.android.flexbox.FlexboxLayoutManager;
+import com.google.android.flexbox.JustifyContent;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,11 +42,13 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
 
-    private ArrayList<StudentData> studentDataArrayList;
-    private ArrayList<String> branchList;
+    private ArrayList<StudentData> studentDataArrayList = new ArrayList<>();
+    private ArrayList<String> branchList = new ArrayList<>();
     private String searchText;
-    private String filterByBranch;
+    private ArrayList<String> filterByBranch = new ArrayList<>();
     private RecyclerView recyclerView;
+    private float filterByCgpa;
+    private Dialog dialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +56,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         branchList = new ArrayList<>();
         searchText = "";
-        filterByBranch = "";
         recyclerView = findViewById(R.id.recycler);
         recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
         ((EditText)findViewById(R.id.et_search)).addTextChangedListener(new TextWatcher() {
@@ -77,9 +84,10 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.filter_list).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(filterByBranch.trim().length()==0) showFilterDialog();
+                if(filterByBranch.size()==0 && filterByCgpa==0) showFilterDialog();
                 else{
-                    filterByBranch = "";
+                    filterByBranch.clear();
+                    filterByCgpa=0;
                     ((CardView)findViewById(R.id.filter_list)).setCardBackgroundColor(Color.parseColor("#3700B3"));
                     filterStudentList(searchText);
                 }
@@ -87,28 +95,37 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void filterStudentListByBranch() {
-        if(filterByBranch.trim().length()==0) return;
-        ArrayList<StudentData> arrayList = ((StudentAdapter)recyclerView.getAdapter()).getStudentDataArrayList();
-        ArrayList<StudentData> filteredList = new ArrayList<>();
-        for(StudentData data : arrayList) if(data.getBranch().equals(filterByBranch)) filteredList.add(data);
-        ((StudentAdapter)recyclerView.getAdapter()).setStudentDataArrayList(filteredList);
-
-    }
-
     private void showFilterDialog() {
         Dialog dialog = new Dialog(this);
-        dialog.setContentView(R.layout.dialog_select_branch);
+        dialog.setContentView(R.layout.dialog_filter);
         dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         dialog.getWindow().getDecorView().setBackgroundResource(android.R.color.transparent);
-        ((ListView)dialog.findViewById(R.id.list)).setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1,branchList));
-        ((ListView)dialog.findViewById(R.id.list)).setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        FlexboxLayoutManager flexboxLayoutManager = new FlexboxLayoutManager(this);
+        flexboxLayoutManager.setFlexDirection(FlexDirection.ROW);
+        flexboxLayoutManager.setJustifyContent(JustifyContent.FLEX_START);
+        flexboxLayoutManager.setAlignItems(AlignItems.FLEX_START);
+        RecyclerView branchRecycler = dialog.findViewById(R.id.recycler);
+        branchRecycler.setLayoutManager(flexboxLayoutManager);
+        branchRecycler.setAdapter(new BranchAdapter(branchList));
+        dialog.findViewById(R.id.cancel).setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            public void onClick(View v) {
                 dialog.dismiss();
-                filterByBranch = branchList.get(position);
-                filterStudentListByBranch();
-                ((CardView)findViewById(R.id.filter_list)).setCardBackgroundColor(Color.RED);
+            }
+        });
+        dialog.findViewById(R.id.filter).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+                try{
+                    filterByCgpa = Float.parseFloat(((EditText)dialog.findViewById(R.id.et_filter_cgpa)).getText().toString());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    filterByCgpa = 0;
+                }
+                filterByBranch = ((BranchAdapter)branchRecycler.getAdapter()).getSelectedBranches();
+                if(filterByCgpa>0 || filterByBranch.size()>0) ((CardView)findViewById(R.id.filter_list)).setCardBackgroundColor(Color.RED);
+                filterStudentList(searchText);
             }
         });
         dialog.show();
@@ -125,6 +142,26 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 dialog.dismiss();
+            }
+        });
+        dialog.findViewById(R.id.choose).setVisibility(View.VISIBLE);
+        dialog.findViewById(R.id.choose).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Dialog branchChooser = new Dialog(MainActivity.this);
+                branchChooser.setContentView(R.layout.dialog_select_branch);
+                branchChooser.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                branchChooser.getWindow().getDecorView().setBackgroundResource(android.R.color.transparent);
+                ((ListView)branchChooser.findViewById(R.id.list)).setAdapter(new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1,branchList));
+                ((ListView)branchChooser.findViewById(R.id.list)).setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        branchChooser.dismiss();
+                        ((EditText)dialog.findViewById(R.id.branch)).setText(branchList.get(position));
+                    }
+                });
+                branchChooser.getWindow().setDimAmount(0.90f);
+                branchChooser.show();
             }
         });
         dialog.findViewById(R.id.ok).setOnClickListener(new View.OnClickListener() {
@@ -199,6 +236,7 @@ public class MainActivity extends AppCompatActivity {
                     if(recyclerView.getAdapter()==null) recyclerView.setAdapter(new StudentAdapter(studentDataArrayList));
                     else((StudentAdapter)recyclerView.getAdapter()).setStudentDataArrayList(studentDataArrayList);
                     filterStudentList(searchText);
+                    findViewById(R.id.load).setVisibility(View.GONE);
                 }
             }
 
@@ -212,16 +250,18 @@ public class MainActivity extends AppCompatActivity {
     private void filterStudentList(String searchText) {
         ArrayList<StudentData> filteredList = new ArrayList<>();
         for(StudentData data : studentDataArrayList){
-            if(data.getName().toLowerCase().contains(searchText.toLowerCase())
-                    || data.getBranch().toLowerCase().contains(searchText.toLowerCase())
-                    || String.valueOf(data.getSap()).contains(searchText.toLowerCase())
-                    || String.valueOf(data.getCgpa()).contains(searchText.toLowerCase())){
+            if((data.getName().toLowerCase().contains(searchText.toLowerCase())
+                        || data.getBranch().toLowerCase().contains(searchText.toLowerCase())
+                        || String.valueOf(data.getSap()).contains(searchText.toLowerCase())
+                        || String.valueOf(data.getCgpa()).contains(searchText.toLowerCase()))
+                    && (filterByBranch.size()==0 || filterByBranch.contains(data.getBranch()))
+                    && data.getCgpa()>=filterByCgpa){
                 filteredList.add(data);
             }
         }
         filteredList = sortList(filteredList);
-        ((StudentAdapter)recyclerView.getAdapter()).setStudentDataArrayList(filteredList);
-        filterStudentListByBranch();
+        if(recyclerView.getAdapter()!=null) ((StudentAdapter)recyclerView.getAdapter()).setStudentDataArrayList(filteredList);
+        else recyclerView.setAdapter(new StudentAdapter(filteredList));
     }
     private ArrayList<StudentData> sortList(ArrayList<StudentData> arrayList){
         StudentData[] studentData = new StudentData[arrayList.size()];

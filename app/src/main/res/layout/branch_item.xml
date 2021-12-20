@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_margin="4dp"
+    app:cardCornerRadius="30dp"
+    app:cardPreventCornerOverlap="true"
+    app:cardBackgroundColor="#DDDDDD"
+    android:id="@+id/card">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="15dp"
+        android:layout_marginVertical="4dp"
+        android:text="Engineering Branch"
+        android:id="@+id/text"/>
+
+</androidx.cardview.widget.CardView>
