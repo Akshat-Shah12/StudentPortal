@@ -8,10 +8,29 @@
     android:id="@+id/layout">
 
     <androidx.cardview.widget.CardView
+        android:layout_width="46dp"
+        android:layout_height="46dp"
+        android:layout_alignParentEnd="true"
+        app:cardBackgroundColor="#FF0000"
+        android:layout_marginEnd="10dp"
+        android:layout_marginTop="10dp"
+        android:id="@+id/logout"
+        app:cardCornerRadius="23dp">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="5dp"
+            android:src="@drawable/ic_baseline_logout_24"/>
+
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
         android:id="@+id/search_card"
+        android:layout_toStartOf="@id/logout"
         app:cardCornerRadius="80dp"
         app:cardBackgroundColor="#CCCCCC"
         app:cardPreventCornerOverlap="true">
